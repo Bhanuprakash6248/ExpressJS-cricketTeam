@@ -41,3 +41,60 @@ app.get('/players/', async (request, response) => {
 })
 
 module.exports = app
+
+//CREATE A PLAYER { API 2 }
+
+app.post('/players/', async (request, response) => {
+  const playerDetails = request.body
+  const {playerName, jerseyNumber, role} = playerDetails
+
+  const addPlayerQuery = `INSERT INTO 
+    cricket_team (player_name,jersey_number,role)
+    VALUES
+    (
+     '${playerName}',
+      ${jerseyNumber},
+     '${role}'
+    );`
+  const dbResponse = await db.run(addPlayerQuery)
+  const playerId = dbResponse.lastID
+  response.send('Player Added to Team')
+})
+
+//API 3 --> GET a playerList
+
+app.get('/players/:playerId/', async (request, response) => {
+  const {playerId} = request.params
+
+  const playerQuery = `
+  SELECT *
+  FROM cricket_team
+  WHERE playerId = ${playerId};`
+
+  const player = await db.get(playerQuery)
+  response.send(player)
+})
+
+//API 4 --> PUT a player
+
+app.put('/players/:playerId/', async (request, response) => {
+  const {playerId} = request.params
+  const playerDetails = request.body
+  const {playerName, jerseyNumber, role} = playerDetails
+
+  const updateQuery = `
+  UPDATE cricket_team
+  SET
+  player_name = '${playerName}',
+  jersey_number = ${jerseyNumber},
+  role = '${role}'
+  WHERE 
+  player_id = ${playerId}
+  `
+  db.run(updateQuery)
+  response.send('Player Details Updated')
+})
+
+//API 5 -> Delete the player
+
+app.delete('/players/:playerId/', (request, response) => {})
